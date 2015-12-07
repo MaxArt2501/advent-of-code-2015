@@ -4,7 +4,7 @@ for (var i = 0; md5(input + i).slice(0, 5) !== "00000"; i++);
 
 console.log(i);
 
-// Explanation: I'm not very fond of this puzzles, as it basically involves brute force to find the solution.
+// Explanation: I'm not very fond of this puzzle, as it basically consists in brute force to find the answer.
 // It involves calculating hashes using MD5, which is available in node.js in the native crypto module, but
 // it's not in a browser environment. There's `window.crypto.subtle.digest`, but MD5 support has been removed
 // as it's not considered secure (quite a silly reason if you ask me, since MD5 can be used for other things
