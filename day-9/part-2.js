@@ -1,4 +1,6 @@
-var cities = Array.from(new Set(input.split(/ = \d+\n| to /).slice(0, -1)));
+// A little change here: instead of `Array.from`, we can just use the spread operator to get an array out
+// of a `Set`.
+var cities = [ ...new Set(input.split(/ = \d+\n| to /).slice(0, -1)) ];
 
 var distances = cities.reduce((obj, city) => Object.assign(obj, { [city]: {} }), {});
 
