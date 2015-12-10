@@ -9,15 +9,12 @@ var cities = Array.from(new Set(input.split(/ = \d+\n| to /).slice(0, -1)));
 
 // We store the distances between cities here, as a nice nested hashmap. So, for example,
 // `distances.London.Dublin = 464`.
-var distances = {};
+var distances = cities.reduce((obj, city) => Object.assign(obj, { [city]: {} }), {});
 
 // Now we parse the input. Array destructuring allows us to get the source, the destination and the distance
 // all in one hit. Then we build the `distances` map.
 input.slice(0,-1).split("\n").forEach(line => {
     let [ , source, destination, distance ] = line.match(/^(\w+) to (\w+) = (\d+)$/);
-
-    if (!distances[source]) distances[source] = {};
-    if (!distances[destination]) distances[destination] = {};
 
     distances[source][destination] =
         distances[destination][source] = +distance;

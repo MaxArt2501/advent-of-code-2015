@@ -1,12 +1,9 @@
 var cities = Array.from(new Set(input.split(/ = \d+\n| to /).slice(0, -1)));
 
-var distances = {};
+var distances = cities.reduce((obj, city) => Object.assign(obj, { [city]: {} }), {});
 
 input.slice(0,-1).split("\n").forEach(line => {
     let [ , source, destination, distance ] = line.match(/^(\w+) to (\w+) = (\d+)$/);
-
-    if (!distances[source]) distances[source] = {};
-    if (!distances[destination]) distances[destination] = {};
 
     distances[source][destination] =
         distances[destination][source] = +distance;
