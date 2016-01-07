@@ -4,27 +4,38 @@ var TEASPOONS = 100,
 var ings = input.slice(0, -1).split("\n").map(
     line => line.match(/(-?\d+).*?(-?\d+).*?(-?\d+).*?(-?\d+).*?(-?\d+)/).slice(1).map(Number)
 );
+var props = ings[0].slice(0, 4).map((n, index) => ings.map(data => data[index]));
+
+var dotProduct = (array1, array2) => array1.reduce((sum, entry, index) => sum + entry * array2[index], 0),
+    getScore = (...amounts) => props.reduce((prod, data) => prod * Math.max(0, dotProduct(amounts, data)), 1);
 
 var maxScore = 0;
 
-var xLimit = Math.min(TEASPOONS, CALORIES / ings[0][4]);
+// Now we have *two* constraints (the amount of calories), so we can compute *two* parameters out of the
+// other two, *and* limit the number of teaspoons for each ingredient with the remaining amount of calories,
+// sparing us a lot of iterations. This part is, in fact, much quicker.
+var sprinkleLimit = Math.min(TEASPOONS, CALORIES / ings[0][4]);
 
-for (var x = 0; x <= xLimit; x++) {
-    var xCalories = x * ings[0][4],
-        yLimit = Math.min(TEASPOONS - x, (CALORIES - xCalories) / ings[1][4]);
-    for (var y = yLimit; y >= 0; y--) {
-        var yCalories = y * ings[1][4],
-            remainingTeaspoons = TEASPOONS - x - y,
-            remainingCalories = CALORIES - xCalories - yCalories;
+for (var sprinkles = 0; sprinkles <= sprinkleLimit; sprinkles++) {
+    var sprinkleCalories = sprinkles * ings[0][4],
+        peanutButterLimit = Math.min(TEASPOONS - sprinkles, (CALORIES - sprinkleCalories) / ings[1][4]);
+    for (var peanutButter = peanutButterLimit; peanutButter >= 0; peanutButter--) {
+        var peanutButterCalories = peanutButter * ings[1][4],
+            remainingTeaspoons = TEASPOONS - sprinkles - peanutButter,
+            remainingCalories = CALORIES - sprinkleCalories - peanutButterCalories;
 
+        // We don't match the amount of calories: let's skip this solution.
         if ((remainingCalories - ings[3][4] * remainingTeaspoons) % (ings[2][4] - ings[3][4])) continue;
 
-        var z = (remainingCalories - ings[3][4] * remainingTeaspoons) / (ings[2][4] - ings[3][4]),
-            w = TEASPOONS - x - y - z,
-            score = Math.max(0, x * ings[0][0] + y * ings[1][0] + z * ings[2][0] + w * ings[3][0])
-                    * Math.max(0, x * ings[0][1] + y * ings[1][1] + z * ings[2][1] + w * ings[3][1])
-                    * Math.max(0, x * ings[0][2] + y * ings[1][2] + z * ings[2][2] + w * ings[3][2])
-                    * Math.max(0, x * ings[0][3] + y * ings[1][3] + z * ings[2][3] + w * ings[3][3]);
+        // Using the constraint on calories to compute the amount of teaspoons of frosting. If this is
+        // confusing, just do the math starting from the system of two linear equations in 4 variables
+        // the the problem gives you:
+        //        SP +     PB +     FR +     SU = 100
+        //    spC*SP + pbC*PB + frC*FR + suC*SU = 500
+        var frosting = (remainingCalories - ings[3][4] * remainingTeaspoons) / (ings[2][4] - ings[3][4]),
+            sugar = TEASPOONS - sprinkles - peanutButter - frosting,
+            score = getScore(sprinkles, peanutButter, frosting, sugar);
+
         if (score > maxScore)
             maxScore = score;
     }
